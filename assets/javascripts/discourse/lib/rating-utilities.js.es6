@@ -60,4 +60,50 @@ let starRatingRaw = function(rating, opts = {}) {
   return '<span class="star-rating">' + content + '</span>';
 };
 
-export { ratingEnabled, removeRating, editRating, starRatingRaw };
+var getBadges1 = function(post_id, topicId, username) {
+  return ajax("/rating/badges", {
+    type: 'GET',
+    dataType: "json",
+    accept: 'json',
+    data: {
+      post_id: post_id,
+      username: username,
+      topic_id: topicId
+    },
+  }).then(function (result, error) {
+    if (error) {
+      console.log("error")
+      popupAjaxError(error);
+    }
+    
+    if (result){
+      return result
+    }else{
+      return null
+    }
+    
+  });
+};
+
+
+var getBadges = function(post_id, topicId, username) {
+let badgeInfo=false
+var xhr = new XMLHttpRequest();
+  var url='/rating/badges?post_id='+post_id
+  
+  xhr.open('GET', url,false);
+  xhr.setRequestHeader('Content-Type', 'application/json');
+  xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+
+  
+  xhr.onload = function() {
+      if (xhr.readyState == 4 && xhr.status == 200) {
+        console.log("aaaaaaaaaaaaaaaaaaa")
+        badgeInfo = JSON.parse(xhr.responseText);
+      }
+   };
+  xhr.send();
+  return badgeInfo
+};
+
+export { ratingEnabled, removeRating, editRating, starRatingRaw , getBadges};
