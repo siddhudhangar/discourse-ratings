@@ -28,6 +28,7 @@ after_initialize do
   DiscourseRatings::Engine.routes.draw do
     post "/rate" => "rating#rate"
     post "/remove" => "rating#remove"
+    get '/badges' => 'rating#getBadges'
   end
 
   Discourse::Application.routes.append do

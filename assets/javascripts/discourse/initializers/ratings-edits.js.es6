@@ -1,7 +1,11 @@
 import Composer from 'discourse/models/composer';
 import { withPluginApi } from 'discourse/lib/plugin-api';
 import { default as computed, on, observes } from 'ember-addons/ember-computed-decorators';
-import { ratingEnabled, removeRating, editRating, starRatingRaw } from '../lib/rating-utilities';
+import { ratingEnabled, removeRating, editRating, starRatingRaw, getBadges } from '../lib/rating-utilities';
+const badgeClass =  ["badge-type-gold", "badge-type-silver", "badge-type-bronze"];
+const { iconNode } = require("discourse-common/lib/icon-library");
+const { h } = require("virtual-dom");
+var badgeCache = {}
 
 export default {
   name: 'ratings-edits',
@@ -12,17 +16,77 @@ export default {
     Composer.serializeToTopic('rating_target_id', 'topic.rating_target_id');
 
     withPluginApi('0.8.10', api => {
+    var chk_page_refresh_or_not = false
       api.includePostAttributes('rating');
 
       api.decorateWidget('poster-name:after', function(helper) {
         const rating = helper.attrs.rating;
         const model = helper.getModel();
+        const post_id = helper.attrs.id
+        const topicId = helper.attrs.topicId
+        const username = helper.attrs.username
+        //console.log(helper.attrs.username)
+        //console.log(post_id)
+        //console.log(topicId)
+        badgeCache[topicId]=topicId
+        //console.log(badgeCache)
 
-        if (model && model.topic && model.topic.rating_enabled && rating) {
-          let html = new Handlebars.SafeString(starRatingRaw(rating));
-          return helper.rawHtml(`${html}`);
-        }
+        var badges_info = getBadges(post_id,topicId,username)
+        console.log(badges_info)
+        if (badges_info && badges_info["total_posts"] !=0 ) {
+        var badgeArray=[]
+          for (var i = 1; i < badges_info["total_posts"]+1; i++) {
+            
+          
+            var slug = badges_info[i].name.toLowerCase()
+            var badge_slug = slug.replace(" ","-")
+            //console.log(badge_slug)
+            //console.log(i)
+            //console.log("====================================")
+            badgeArray.push({ 
+              icon: badges_info[i].icon.replace("fa-",""),
+              image: badges_info[i].image,
+              className: badgeClass[badges_info[i].badge_type_id-1],
+              name: badges_info[i].name,
+              id: badges_info[i].id,
+              badgeGroup: badges_info[i].badge_grouping_id,
+              title: badges_info[i].description,
+              url: `/badges/${badges_info[i].id}/${badge_slug}`
+            });
+            
+            //console.log("====================================")
+            //console.log(badgeArray)
+          }
+
+            let trustLevel = "";
+            let highestBadge = 0;
+            function buildBadge(badge) {
+            if (badge) {
+                let iconBody;
+                if(badge.image) {
+                  iconBody = helper.h("img", { attributes: { src: badge.image } });
+                } else if (badge.icon) {
+                  iconBody = iconNode(badge.icon);
+                }
+                if(badge.url) {
+                  iconBody = helper.h("a", { attributes: { href: badge.url } }, iconBody);
+                }
+                if(badge.badgeGroup === 4 && badge.id > highestBadge) {
+                  highestBadge = badge.id;
+                  trustLevel = badge.name + "-highest";
+                }
+                return helper.h("span.poster-icon", { className: badge.className + " " + badge.name, attributes: { title: badge.title } }, iconBody);
+              }
+            }
+            let posterBadges = [];
+            badgeArray.forEach(badgeParts => {
+              posterBadges.push(buildBadge(badgeParts));
+            });
+            //console.log(posterBadges)
+            return helper.h("div.poster-icon-container", { className: trustLevel }, posterBadges);
+          }
       });
+
 
       api.modifyClass('model:composer', {
         includeRating: false,
