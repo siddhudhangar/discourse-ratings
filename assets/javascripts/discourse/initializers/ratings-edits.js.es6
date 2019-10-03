@@ -50,7 +50,7 @@ export default {
               name: badges_info[i].name,
               id: badges_info[i].id,
               badgeGroup: badges_info[i].badge_grouping_id,
-              title: badges_info[i].description,
+              title: badges_info[i].name,
               url: `/badges/${badges_info[i].id}/${badge_slug}`
             });
             
