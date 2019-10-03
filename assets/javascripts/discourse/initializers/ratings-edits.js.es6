@@ -75,7 +75,7 @@ export default {
                   highestBadge = badge.id;
                   trustLevel = badge.name + "-highest";
                 }
-                return helper.h("span.poster-icon", { className: badge.className + " " + badge.name, attributes: { title: badge.title } }, iconBody);
+                return helper.h("span.poster-icon", { className: badge.className + " " + badge.name, attributes: { title: badge.name } }, iconBody);
               }
             }
             let posterBadges = [];
