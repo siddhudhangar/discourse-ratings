@@ -37,6 +37,7 @@ after_initialize do
     ../extensions/post_revisor.rb
     ../extensions/posts_controller.rb
     ../extensions/topic.rb
+    ../app/controllers/ratings/newfile.rb
   ].each do |path|
     load File.expand_path(path, __FILE__)
   end
