@@ -5,6 +5,8 @@ import { default as discourseComputed, on, observes } from "discourse-common/uti
 import { notEmpty, and, alias, or } from "@ember/object/computed";
 import { ratingListHtml, getBadges } from '../lib/rating-utilities';
 import { scheduleOnce, later } from "@ember/runloop";
+const badgeClass =  ["badge-type-gold", "badge-type-silver", "badge-type-bronze"];
+const { iconNode } = require("discourse-common/lib/icon-library");
 
 export default {
   name: 'initialize-ratings',
@@ -32,13 +34,62 @@ export default {
         console.log(topicId);
         console.log(username);
         var badges_info = getBadges(post_id,topicId,username)
-        console.log(badges_info)
+        console.log(badges_info);
 
         if (post.topic.show_ratings && post.ratings) {
-          return helper.rawHtml(
-            `${new Handlebars.SafeString(ratingListHtml(post.ratings))}`
-          );
+          //return helper.rawHtml(
+          //  `${new Handlebars.SafeString(ratingListHtml(post.ratings))}`
+          //);
         }
+        if (badges_info && badges_info["total_posts"] !=0 ) {
+        var badgeArray=[]
+          for (var i = 1; i < badges_info["total_posts"]+1; i++) {
+            var slug = badges_info[i].name.toLowerCase()
+            var badge_slug = slug.replace(" ","-")
+            //console.log(badge_slug)
+            //console.log(i)
+            //console.log("====================================")
+            badgeArray.push({ 
+              icon: badges_info[i].icon.replace("fa-",""),
+              image: badges_info[i].image,
+              className: badgeClass[badges_info[i].badge_type_id-1],
+              name: badges_info[i].name,
+              id: badges_info[i].id,
+              badgeGroup: badges_info[i].badge_grouping_id,
+              title: badges_info[i].name,
+              url: `/badges/${badges_info[i].id}/${badge_slug}`
+            });
+            //console.log("====================================")
+            //console.log(badgeArray)
+          }
+
+            let trustLevel = "";
+            let highestBadge = 0;
+            function buildBadge(badge) {
+            if (badge) {
+                let iconBody;
+                if(badge.image) {
+                  iconBody = helper.h("img", { attributes: { src: badge.image } });
+                } else if (badge.icon) {
+                  iconBody = iconNode(badge.icon);
+                }
+                if(badge.url) {
+                  iconBody = helper.h("a", { attributes: { href: badge.url } }, iconBody);
+                }
+                if(badge.badgeGroup === 4 && badge.id > highestBadge) {
+                  highestBadge = badge.id;
+                  trustLevel = badge.name + "-highest";
+                }
+                return helper.h("span.poster-icon", { className: badge.className + " " + badge.name, attributes: { title: badge.name } }, iconBody);
+              }
+            }
+            let posterBadges = [];
+            badgeArray.forEach(badgeParts => {
+              posterBadges.push(buildBadge(badgeParts));
+            });
+            //console.log(posterBadges)
+            return helper.h("div.poster-icon-container", { className: trustLevel }, posterBadges);
+          }
       });
       
       api.reopenWidget("poster-name", {
