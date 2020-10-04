@@ -3,7 +3,7 @@ import Category from 'discourse/models/category';
 import { withPluginApi } from 'discourse/lib/plugin-api';
 import { default as discourseComputed, on, observes } from "discourse-common/utils/decorators";
 import { notEmpty, and, alias, or } from "@ember/object/computed";
-import { ratingListHtml } from '../lib/rating-utilities';
+import { ratingListHtml, getBadges } from '../lib/rating-utilities';
 import { scheduleOnce, later } from "@ember/runloop";
 
 export default {
@@ -23,6 +23,16 @@ export default {
 
       api.decorateWidget("poster-name:after", function(helper) {
         const post = helper.getModel();
+
+        const post_id = helper.attrs.id
+        const topicId = helper.attrs.topicId
+        const username = helper.attrs.username
+        console.log(post);
+        console.log(post_id);
+        console.log(topicId);
+        console.log(username);
+        var badges_info = getBadges(post_id,topicId,username)
+        console.log(badges_info)
 
         if (post.topic.show_ratings && post.ratings) {
           return helper.rawHtml(

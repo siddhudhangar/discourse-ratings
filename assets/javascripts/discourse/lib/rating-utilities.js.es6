@@ -87,6 +87,26 @@ function ratingListHtml(ratings, opts={}) {
   return `<div class="rating-list">${html}</div>`;
 }
 
+var getBadges = function(post_id, topicId, username) {
+let badgeInfo=false
+var xhr = new XMLHttpRequest();
+  //var url='/rating/getbadges?post_id='+post_id
+  var url='/ratings/getbadges/'+post_id
+  xhr.open('GET', url,false);
+  xhr.setRequestHeader('Content-Type', 'application/json');
+  xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+
+  xhr.onload = function() {
+      if (xhr.readyState == 4 && xhr.status == 200) {
+        console.log("aaaaaaaaaaaaaaaaaaa")
+        badgeInfo = JSON.parse(xhr.responseText);
+      }
+   };
+  xhr.send();
+  return badgeInfo
+};
+
+
 function request(type, path='', data={}) {
   return ajax(`/ratings/${path}`, {
     type,
@@ -96,5 +116,6 @@ function request(type, path='', data={}) {
 
 export {
   ratingListHtml,
-  request
+  request,
+  getBadges
 };
