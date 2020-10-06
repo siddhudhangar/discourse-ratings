@@ -29,12 +29,12 @@ export default {
         const post_id = helper.attrs.id
         const topicId = helper.attrs.topicId
         const username = helper.attrs.username
-        console.log(post);
-        console.log(post_id);
-        console.log(topicId);
-        console.log(username);
+        //console.log(post);
+        //console.log(post_id);
+        //console.log(topicId);
+        //console.log(username);
         var badges_info = getBadges(post_id,topicId,username)
-        console.log(badges_info);
+        //console.log(badges_info);
 
         if (post.topic.show_ratings && post.ratings) {
           //return helper.rawHtml(
@@ -69,12 +69,12 @@ export default {
             if (badge) {
                 let iconBody;
                 if(badge.image) {
-                  iconBody = helper.h("img", { attributes: { src: badge.image } });
+                  iconBody = helper.h("img", { attributes: { src: badge.image , height: '40px', width: '40px'} });
                 } else if (badge.icon) {
                   iconBody = iconNode(badge.icon);
                 }
                 if(badge.url) {
-                  iconBody = helper.h("a", { attributes: { href: badge.url } }, iconBody);
+                  iconBody = helper.h("a", { attributes: { href: badge.url , height: '40px', width: '40px'} }, iconBody);
                 }
                 if(badge.badgeGroup === 4 && badge.id > highestBadge) {
                   highestBadge = badge.id;
