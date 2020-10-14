@@ -1,5 +1,6 @@
 DiscourseRatings::Engine.routes.draw do
   get "/getbadges/:post_id" => "newfile#getbadges"
+  get "/badges_info/:post_ids" => "newfile#badges_info"
   scope constraints: AdminConstraint.new do
     resources :rating_type, param: :type, :path => '/rating-type'
     resources :object, param: :type

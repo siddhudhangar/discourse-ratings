@@ -1,12 +1,16 @@
+class HashTree < Hash
+def initialize
+  super do |hash, key|
+    hash[key] = HashTree.new
+  end
+end
+end
+
 class DiscourseRatings::NewfileController < ::ApplicationController
   #before_action :check_types_exist
-  skip_before_action :check_xhr, only: [:getbadges]
-  def getbadges1
-   # puts "getbadgesgetbadgesgetbadgesgetbadges"
-   render :json => {:name => "any name"}
-  end
+  skip_before_action :check_xhr, only: [:getbadges,:badges_info]
 
- def getbadges
+  def getbadges
     # puts "aaaaaaaaaaaaaaaaaaaaaa"
     # puts params[:post_id]
     if true
@@ -46,5 +50,32 @@ class DiscourseRatings::NewfileController < ::ApplicationController
     else
       # puts "normal request"
     end 
+  end
+
+  def badges_info
+    json_data = HashTree.new
+
+    params[:post_ids].split(',') do |post_id|
+      puts post_id
+      sql = "select * from user_badges where post_id=%{post_id}" % {post_id:post_id.to_i}
+      records_array = ActiveRecord::Base.connection.exec_query(sql)
+      total_posts = records_array.count.to_i
+      if records_array.count > 0
+        count = 0
+        records_array.each do |row|
+          badge_id = row["badge_id"]
+          badge_query = "select * from badges where id=%{badge_id}" % {badge_id:badge_id}
+          records_array = ActiveRecord::Base.connection.exec_query(badge_query)
+
+          if records_array.count > 0
+            records_array.each do |row|
+              count = count + 1
+              json_data[post_id][count] = row
+            end
+          end
+        end
+      end
+    end
+    render json: json_data
   end
 end
